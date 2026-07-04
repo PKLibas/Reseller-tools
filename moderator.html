@@ -112,6 +112,7 @@ function round50(n){return Math.ceil(n/50)*50}
 function getP(x){const a=p[selectedType];if(x>b[4])return null;for(let i=0;i<b.length;i++){if(x<=b[i])return a[i]}return a[a.length-1]}
 function calculatePrice(){const v=parseFloat(document.getElementById('pkrAmount').value);if(isNaN(v)||v<0){alert('Please enter a valid PKR amount');return}const x=(v+500)/2.21;const pr=getP(x);const rb=document.getElementById('resultBox');const rv=document.getElementById('resultValue');rb.classList.add('show');if(pr===null){rv.innerHTML='Ask Personally';rv.classList.add('ask-personally')}else{const fp=round50(x+pr);rv.innerHTML='&#2547;'+fp.toLocaleString();rv.classList.remove('ask-personally')}}
 document.getElementById('pkrAmount').addEventListener('keypress',function(e){if(e.key==='Enter')calculatePrice()});
+
 function handleImage(event){
 var file=event.target.files[0];
 if(!file)return;
@@ -122,11 +123,13 @@ preview.src=e.target.result;
 preview.style.display='block';
 var results=document.getElementById('imgResults');
 results.style.display='block';
+// Use the base64 data URL directly in search links
+var dataUrl=e.target.result;
 results.innerHTML='<p style="color:#888;font-size:14px;margin-bottom:12px">&#128269; Search this image on:</p>'+
-'<a href="https://lens.google.com/uploadbyurl?url='+encodeURIComponent(e.target.result)+'" target="_blank">&#128269; Google Lens</a>'+
-'<a href="https://www.bing.com/images/search?q=imgurl:'+encodeURIComponent(e.target.result)+'" target="_blank">&#128269; Bing Images</a>'+
-'<a href="https://tineye.com/search?url='+encodeURIComponent(e.target.result)+'" target="_blank">&#128269; TinEye</a>'+
-'<a href="https://yandex.com/images/search?url='+encodeURIComponent(e.target.result)+'&rpt=imageview" target="_blank">&#128269; Yandex</a>';
+'<a href="https://lens.google.com/uploadbyurl?url='+encodeURIComponent(dataUrl)+'" target="_blank">&#128269; Google Lens</a>'+
+'<a href="https://www.bing.com/images/search?q=imgurl:'+encodeURIComponent(dataUrl)+'" target="_blank">&#128269; Bing Images</a>'+
+'<a href="https://tineye.com/search?url='+encodeURIComponent(dataUrl)+'" target="_blank">&#128269; TinEye</a>'+
+'<a href="https://yandex.com/images/search?url='+encodeURIComponent(dataUrl)+'&rpt=imageview" target="_blank">&#128269; Yandex</a>';
 };
 reader.readAsDataURL(file);
 }
