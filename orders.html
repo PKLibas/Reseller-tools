@@ -1,130 +1,425 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PK LIBAS - Order Manager</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:15px}
-.container{max-width:600px;margin:0 auto}
-.header{background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);border-radius:24px;padding:30px;margin-bottom:20px;text-align:center;box-shadow:0 25px 80px rgba(0,0,0,0.15);position:relative;overflow:hidden}
-.header::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,#667eea,#764ba2,#f093fb,#f5576c);background-size:300% 100%;animation:gradientShift 4s ease infinite}
-@keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-.title{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;color:#2d3748;letter-spacing:3px;margin-bottom:4px}
-.subtitle{font-size:0.8rem;font-weight:500;color:#764ba2;letter-spacing:3px;text-transform:uppercase}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
-.stat-box{background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);padding:20px;border-radius:20px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.1)}
-.stat-box .number{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.stat-box .label{font-size:0.75rem;color:#888;margin-top:4px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
-.tabs{display:flex;gap:8px;margin-bottom:20px;background:rgba(255,255,255,0.95);padding:6px;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.1)}
-.tab{flex:1;padding:14px 8px;background:transparent;border:none;border-radius:12px;font-size:0.85rem;font-weight:700;color:#888;cursor:pointer;transition:.3s;letter-spacing:0.5px}
-.tab.active{background:linear-gradient(135deg,#667eea,#764ba2);color:white;box-shadow:0 4px 15px rgba(102,126,234,0.4)}
-.section{background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);border-radius:24px;padding:28px;margin-bottom:16px;box-shadow:0 8px 32px rgba(0,0,0,0.1)}
-.section h2{font-family:'Playfair Display',serif;font-size:1.3rem;color:#2d3748;margin-bottom:20px;font-weight:700}
-label{display:block;font-size:0.75rem;font-weight:600;color:#4a5568;margin-bottom:8px;letter-spacing:0.5px;text-transform:uppercase}
-label .optional{color:#a0aec0;font-weight:400;font-size:0.7rem}
-input,select{width:100%;padding:14px 16px;border:2px solid #e2e8f0;border-radius:14px;font-size:1rem;margin-bottom:16px;background:#fafafa;transition:.2s;font-family:'Inter',sans-serif}
-input:focus,select:focus{outline:none;border-color:#667eea;background:white;box-shadow:0 0 0 4px rgba(102,126,234,0.1)}
-.btn{width:100%;padding:16px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:14px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 8px 25px rgba(102,126,234,0.3);transition:.2s;font-family:'Inter',sans-serif;letter-spacing:0.5px}
-.btn:active{transform:scale(0.98)}
-.btn-danger{background:linear-gradient(135deg,#ff6b6b,#ee5a5a);box-shadow:0 6px 20px rgba(255,107,107,0.3)}
-.btn-success{background:linear-gradient(135deg,#11998e,#38ef7d);box-shadow:0 6px 20px rgba(17,153,142,0.3)}
-.btn-small{padding:10px 16px;font-size:0.75rem;width:auto;margin-top:0;border-radius:10px}
-.order-card{background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);border-radius:20px;padding:20px;margin-bottom:14px;box-shadow:0 4px 20px rgba(0,0,0,0.08);border-left:5px solid #e2e8f0}
-.order-card.placed{border-left-color:#667eea}
-.order-card.notavail{border-left-color:#ff6b6b}
-.order-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.order-name{font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem;color:#2d3748}
-.order-price{font-family:'Playfair Display',serif;font-weight:700;font-size:1.4rem;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.order-details{font-size:0.8rem;color:#718096;line-height:1.7}
-.order-actions{display:flex;gap:8px;margin-top:14px}
-.hidden{display:none}
-.empty-state{text-align:center;padding:50px 20px;color:#a0aec0}
-.empty-state .icon{font-size:50px;margin-bottom:15px;opacity:.5}
-.search-box{margin-bottom:16px}
-.search-box input{margin-bottom:0;padding:14px 18px;border-radius:14px}
-.badge{display:inline-block;padding:6px 14px;border-radius:20px;font-size:0.7rem;font-weight:700}
-.badge-pending{background:#fff3cd;color:#856404}
-.badge-placed{background:#d1ecf1;color:#0c5460}
-.badge-notavail{background:#f8d7da;color:#721c24}
-.url-box{background:#f0f4ff;padding:12px 16px;border-radius:12px;word-break:break-all;font-size:0.75rem;color:#1a1a2e;margin-top:8px}
-.url-box a{color:#667eea;text-decoration:none;font-weight:600}
-.order-num-box{background:#f0f4ff;padding:10px 14px;border-radius:10px;font-size:0.8rem;color:#667eea;margin-top:8px;font-weight:700}
-.fade-in{animation:fadeIn .3s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
-.row{display:flex;gap:10px}
-.row>div{flex:1}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PK LIBAS - Order Manager</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600;700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(180deg, #4a4e8c 0%, #2d2d5a 50%, #1a1a3e 100%);
+      min-height: 100vh;
+      padding: 20px 15px;
+    }
+
+    .main-card {
+      background: #f0f2ff;
+      border-radius: 24px;
+      max-width: 420px;
+      width: 100%;
+      margin: 0 auto 20px;
+      padding: 30px 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+      text-align: center;
+      color: #2d2d5a;
+      letter-spacing: 2px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #6b5b95;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-top: 6px;
+      margin-bottom: 30px;
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 700;
+      text-align: center;
+      color: #2d2d5a;
+      margin-bottom: 25px;
+    }
+
+    .input-group {
+      margin-bottom: 16px;
+    }
+    .input-group label {
+      display: block;
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    .input-group input, .input-group select, .input-group textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      font-size: 15px;
+      font-family: 'Poppins', sans-serif;
+      transition: border-color 0.3s;
+      background: white;
+    }
+    .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    .input-group textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+    }
+    .row .input-group {
+      flex: 1;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 8px 25px rgba(102,126,234,0.35);
+      transition: transform 0.2s;
+      font-family: 'Poppins', sans-serif;
+      margin-top: 10px;
+    }
+    .submit-btn:active { transform: scale(0.97); }
+    .submit-btn:disabled {
+      background: #ccc;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    .whatsapp-btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 8px 25px rgba(37,211,102,0.35);
+      transition: transform 0.2s;
+      font-family: 'Poppins', sans-serif;
+      margin-top: 10px;
+      display: none;
+      text-decoration: none;
+      text-align: center;
+    }
+    .whatsapp-btn.show { display: block; }
+    .whatsapp-btn:active { transform: scale(0.97); }
+
+    .success-msg {
+      background: #e8f5e9;
+      border: 1px solid #4caf50;
+      color: #2e7d32;
+      padding: 14px;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 14px;
+      margin-top: 15px;
+      display: none;
+    }
+    .success-msg.show { display: block; }
+
+    .orders-list {
+      margin-top: 20px;
+    }
+    .order-item {
+      background: white;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 10px;
+      border-left: 4px solid #667eea;
+    }
+    .order-item .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .order-item .order-id {
+      font-weight: 600;
+      color: #2d2d5a;
+      font-size: 14px;
+    }
+    .order-item .order-status {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+    .status-pending { background: #fff3e0; color: #e65100; }
+    .status-paid { background: #e8f5e9; color: #2e7d32; }
+    .status-delivered { background: #e3f2fd; color: #1565c0; }
+    .order-item .order-details {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.5;
+    }
+    .order-item .order-price {
+      font-weight: 600;
+      color: #667eea;
+      margin-top: 6px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+    }
+    .empty-state .icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      color: #667eea;
+      font-size: 13px;
+      text-decoration: none;
+      margin-top: 20px;
+      font-weight: 500;
+    }
+
+    .info-badge {
+      background: #e8f5e9;
+      color: #2e7d32;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 12px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-<div class="header">
-<h1 class="title">PK LIBAS</h1>
-<p class="subtitle">Order Manager</p>
-</div>
-<div class="stats">
-<div class="stat-box"><div class="number" id="totalOrders">0</div><div class="label">Total Orders</div></div>
-<div class="stat-box"><div class="number" id="totalAmount">0</div><div class="label">Total Value (TK)</div></div>
-</div>
-<div class="tabs">
-<button class="tab active" onclick="showTab('add')">&#10133; Add Order</button>
-<button class="tab" onclick="showTab('list')">&#128203; View Orders</button>
-</div>
-<div id="addSection" class="section">
-<h2>Add New Order</h2>
-<label>Reseller Name</label>
-<input type="text" id="resellerName" placeholder="Enter reseller name">
-<label>Customer Name <span class="optional">(Optional)</span></label>
-<input type="text" id="customerName" placeholder="Enter customer name">
-<label>Dress Details</label>
-<input type="text" id="dressDetails" placeholder="e.g., 3pc Heavy Embroidered Red">
-<div class="row">
-<div><label>Size</label>
-<select id="dressSize"><option value="Small">Small</option><option value="Medium">Medium</option><option value="Large">Large</option><option value="Unstitched">Unstitched</option></select>
-</div>
-<div><label>Stitch</label>
-<select id="stitchType"><option value="Stitched">Stitched</option><option value="Unstitched">Unstitched</option></select>
-</div>
-</div>
-<label>Dress URL <span class="optional">(Copy & paste link)</span></label>
-<input type="text" id="dressUrl" placeholder="https://example.com/dress-link">
-<label>Price (TK)</label>
-<input type="number" id="orderPrice" placeholder="Enter final price">
-<label>Advance Payment (TK)</label>
-<input type="number" id="advancePayment" placeholder="Enter advance amount (0 if none)">
-<label>Status</label>
-<select id="orderStatus" onchange="toggleOrderNum()">
-<option value="pending">Pending</option>
-<option value="placed">Order Placed</option>
-<option value="notavail">Not Available</option>
-</select>
-<div id="orderNumBox" class="hidden">
-<label>Order Number</label>
-<input type="text" id="orderNumber" placeholder="Enter order number">
-</div>
-<label>Notes <span class="optional">(Optional)</span></label>
-<input type="text" id="orderNotes" placeholder="Any extra details...">
-<button class="btn" onclick="addOrder()">&#9989; Save Order</button>
-</div>
-<div id="listSection" class="section hidden">
-<h2>All Orders</h2>
-<div class="search-box"><input type="text" id="searchInput" placeholder="&#128269; Search by name..." oninput="renderOrders()"></div>
-<div id="ordersList"><div class="empty-state"><div class="icon">&#128236;</div><p>No orders yet. Add your first order!</p></div></div>
-</div>
-</div>
-<script>
-var orders=JSON.parse(localStorage.getItem('dressOrders'))||[];
-function showTab(tab){document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});event.target.classList.add('active');if(tab==='add'){document.getElementById('addSection').classList.remove('hidden');document.getElementById('listSection').classList.add('hidden');}else{document.getElementById('addSection').classList.add('hidden');document.getElementById('listSection').classList.remove('hidden');renderOrders();}}
-function toggleOrderNum(){var status=document.getElementById('orderStatus').value;var box=document.getElementById('orderNumBox');if(status==='placed'){box.classList.remove('hidden');box.classList.add('fade-in');}else{box.classList.add('hidden');document.getElementById('orderNumber').value='';}}
-function addOrder(){var reseller=document.getElementById('resellerName').value.trim();var customer=document.getElementById('customerName').value.trim();var dress=document.getElementById('dressDetails').value.trim();var size=document.getElementById('dressSize').value;var stitch=document.getElementById('stitchType').value;var url=document.getElementById('dressUrl').value.trim();var price=parseFloat(document.getElementById('orderPrice').value)||0;var advance=parseFloat(document.getElementById('advancePayment').value)||0;var status=document.getElementById('orderStatus').value;var orderNumber=document.getElementById('orderNumber').value.trim();var notes=document.getElementById('orderNotes').value.trim();if(!reseller||!dress||!price){alert('Please fill in Reseller Name, Dress Details, and Price');return;}if(status==='placed'&&!orderNumber){alert('Please enter an Order Number for "Order Placed" status');return;}var order={id:Date.now(),reseller,customer,dress,size,stitch,url,price,advance,status,orderNumber,notes,date:new Date().toLocaleDateString()};orders.push(order);localStorage.setItem('dressOrders',JSON.stringify(orders));document.getElementById('resellerName').value='';document.getElementById('customerName').value='';document.getElementById('dressDetails').value='';document.getElementById('dressUrl').value='';document.getElementById('orderPrice').value='';document.getElementById('advancePayment').value='';document.getElementById('orderNumber').value='';document.getElementById('orderNotes').value='';document.getElementById('orderStatus').value='pending';toggleOrderNum();updateStats();alert('Order saved!');}
-function renderOrders(){var search=document.getElementById('searchInput').value.toLowerCase();var list=document.getElementById('ordersList');var filtered=orders;if(search){filtered=orders.filter(function(o){return o.reseller.toLowerCase().includes(search)||(o.customer&&o.customer.toLowerCase().includes(search))||o.dress.toLowerCase().includes(search);});}filtered=filtered.sort(function(a,b){return b.id-a.id;});if(filtered.length===0){list.innerHTML='<div class="empty-state"><div class="icon">&#128236;</div><p>No orders found.</p></div>';return;}list.innerHTML=filtered.map(function(order){var remaining=order.price-order.advance;var statusClass='',statusBadge='';if(order.status==='pending'){statusBadge='<span class="badge badge-pending">Pending</span>';}else if(order.status==='placed'){statusClass='placed';statusBadge='<span class="badge badge-placed">Order Placed</span>';}else if(order.status==='notavail'){statusClass='notavail';statusBadge='<span class="badge badge-notavail">Not Available</span>';}var urlDisplay=order.url?'<div class="url-box">&#128279; <a href="'+order.url+'" target="_blank">'+order.url+'</a></div>':'';var orderNumDisplay=order.orderNumber?'<div class="order-num-box">&#128203; Order #: '+order.orderNumber+'</div>':'';return '<div class="order-card '+statusClass+'"><div class="order-header"><div><div class="order-name">'+(order.customer||'No Customer Name')+'</div><div style="font-size:0.75rem;color:#a0aec0">Reseller: '+order.reseller+'</div></div><div style="text-align:right"><div class="order-price">'+order.price.toLocaleString()+' TK</div>'+statusBadge+'</div></div><div class="order-details">&#128087; '+order.dress+'<br>&#128207; Size: '+order.size+' | &#129525; '+order.stitch+'<br>&#128197; '+order.date+'<br>&#128176; Advance: '+order.advance.toLocaleString()+' TK | Due: '+remaining.toLocaleString()+' TK'+(order.notes?'<br>&#128221; '+order.notes:'')+'</div>'+orderNumDisplay+urlDisplay+'<div class="order-actions"><button class="btn btn-small btn-success" onclick="markPaid('+order.id+')">&#128176; Paid</button><button class="btn btn-small" style="background:linear-gradient(135deg,#667eea,#764ba2);box-shadow:0 4px 15px rgba(102,126,234,0.3)" onclick="markDelivered('+order.id+')">&#128230; Delivered</button><button class="btn btn-small btn-danger" onclick="deleteOrder('+order.id+')">&#128465; Delete</button></div></div>';}).join('');}
-function markPaid(id){var order=orders.find(function(o){return o.id===id;});if(order){order.status='paid';order.advance=order.price;localStorage.setItem('dressOrders',JSON.stringify(orders));renderOrders();updateStats();}}
-function markDelivered(id){var order=orders.find(function(o){return o.id===id;});if(order){order.status='delivered';localStorage.setItem('dressOrders',JSON.stringify(orders));renderOrders();updateStats();}}
-function deleteOrder(id){if(!confirm('Delete this order?'))return;orders=orders.filter(function(o){return o.id!==id;});localStorage.setItem('dressOrders',JSON.stringify(orders));renderOrders();updateStats();}
-function updateStats(){document.getElementById('totalOrders').textContent=orders.length;var total=orders.reduce(function(sum,o){return sum+o.price;},0);document.getElementById('totalAmount').textContent=total.toLocaleString();}
-updateStats();
-</script>
+  <div class="main-card">
+    <div class="logo">PK LIBAS</div>
+    <div class="subtitle">Order Manager</div>
+
+    <div class="info-badge">
+      📱 Orders will be sent to WhatsApp: +92 330 6225595
+    </div>
+
+    <div class="section-title">Add New Order</div>
+
+    <div class="input-group">
+      <label>Reseller Name</label>
+      <input type="text" id="resellerName" placeholder="Enter reseller name">
+    </div>
+
+    <div class="input-group">
+      <label>Customer Name (Optional)</label>
+      <input type="text" id="customerName" placeholder="Enter customer name">
+    </div>
+
+    <div class="input-group">
+      <label>Dress Details</label>
+      <textarea id="dressDetails" placeholder="Describe the dress (color, style, brand, etc.)"></textarea>
+    </div>
+
+    <div class="row">
+      <div class="input-group">
+        <label>Size</label>
+        <select id="size">
+          <option value="">Select</option>
+          <option value="XS">XS</option>
+          <option value="S">S</option>
+          <option value="M">M</option>
+          <option value="L">L</option>
+          <option value="XL">XL</option>
+          <option value="XXL">XXL</option>
+          <option value="Custom">Custom</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label>Stitch</label>
+        <select id="stitch">
+          <option value="">Select</option>
+          <option value="Unstitched">Unstitched</option>
+          <option value="Stitched">Stitched</option>
+          <option value="Semi-Stitched">Semi-Stitched</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>Dress URL (Copy & paste link)</label>
+      <input type="text" id="dressUrl" placeholder="https://...">
+    </div>
+
+    <div class="row">
+      <div class="input-group">
+        <label>Price (TK)</label>
+        <input type="number" id="price" placeholder="0">
+      </div>
+      <div class="input-group">
+        <label>Advance Payment (TK)</label>
+        <input type="number" id="advance" placeholder="0">
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>Status</label>
+      <select id="status">
+        <option value="Pending">Pending</option>
+        <option value="Paid">Paid</option>
+        <option value="Delivered">Delivered</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label>Order Number</label>
+      <input type="text" id="orderNumber" placeholder="Auto-generated" readonly>
+    </div>
+
+    <div class="input-group">
+      <label>Notes (Optional)</label>
+      <textarea id="notes" placeholder="Any special instructions..."></textarea>
+    </div>
+
+    <button class="submit-btn" id="submitBtn" onclick="prepareOrder()">📋 Prepare Order</button>
+
+    <a class="whatsapp-btn" id="whatsappBtn" href="#" target="_blank">📱 Send Order via WhatsApp</a>
+
+    <div class="success-msg" id="successMsg">
+      ✅ Order prepared! Tap the green button above to send it via WhatsApp.
+    </div>
+
+    <a href="index.html" class="back-link">← Back to Home</a>
+  </div>
+
+  <div class="main-card">
+    <div class="section-title">📦 Saved Orders</div>
+    <div id="ordersList">
+      <div class="empty-state">
+        <div class="icon">📭</div>
+        <div>No orders saved yet</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Generate order number on load
+    document.getElementById('orderNumber').value = 'PKL-' + Date.now().toString().slice(-6);
+
+    // Load saved orders
+    loadOrders();
+
+    function prepareOrder() {
+      const reseller = document.getElementById('resellerName').value.trim();
+      const customer = document.getElementById('customerName').value.trim();
+      const details = document.getElementById('dressDetails').value.trim();
+      const size = document.getElementById('size').value;
+      const stitch = document.getElementById('stitch').value;
+      const url = document.getElementById('dressUrl').value.trim();
+      const price = document.getElementById('price').value;
+      const advance = document.getElementById('advance').value;
+      const status = document.getElementById('status').value;
+      const orderNum = document.getElementById('orderNumber').value;
+      const notes = document.getElementById('notes').value.trim();
+
+      if (!reseller || !details || !price) {
+        alert('Please fill in Reseller Name, Dress Details, and Price.');
+        return;
+      }
+
+      // Build WhatsApp message
+      const message = `🛒 *NEW ORDER - PK LIBAS*
+
+📋 Order #: ${orderNum}
+👤 Reseller: ${reseller}
+${customer ? '🧑 Customer: ' + customer + '\n' : ''}👗 Dress: ${details}
+📏 Size: ${size || 'N/A'}
+🪡 Stitch: ${stitch || 'N/A'}
+💰 Price: ${price} TK
+💳 Advance: ${advance || '0'} TK
+📊 Status: ${status}
+${url ? '🔗 URL: ' + url + '\n' : ''}${notes ? '📝 Notes: ' + notes + '\n' : ''}
+⏰ Submitted: ${new Date().toLocaleString()}`;
+
+      // Create WhatsApp link
+      const whatsappUrl = 'https://wa.me/923306225595?text=' + encodeURIComponent(message);
+
+      // Save order locally
+      const order = {
+        id: orderNum,
+        reseller, customer, details, size, stitch, url, price, advance, status, notes,
+        date: new Date().toISOString()
+      };
+
+      let orders = JSON.parse(localStorage.getItem('pkl_orders') || '[]');
+      orders.unshift(order);
+      localStorage.setItem('pkl_orders', JSON.stringify(orders));
+
+      // Show WhatsApp button
+      const btn = document.getElementById('whatsappBtn');
+      btn.href = whatsappUrl;
+      btn.classList.add('show');
+
+      document.getElementById('successMsg').classList.add('show');
+
+      // Refresh orders list
+      loadOrders();
+
+      // Generate new order number
+      document.getElementById('orderNumber').value = 'PKL-' + Date.now().toString().slice(-6);
+    }
+
+    function loadOrders() {
+      const orders = JSON.parse(localStorage.getItem('pkl_orders') || '[]');
+      const container = document.getElementById('ordersList');
+
+      if (orders.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">📭</div>
+            <div>No orders saved yet</div>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = orders.map(o => `
+        <div class="order-item">
+          <div class="order-header">
+            <span class="order-id">${o.id}</span>
+            <span class="order-status status-${o.status.toLowerCase()}">${o.status}</span>
+          </div>
+          <div class="order-details">
+            <strong>${o.reseller}</strong>${o.customer ? ' → ' + o.customer : ''}<br>
+            ${o.details}<br>
+            ${o.size ? 'Size: ' + o.size + ' | ' : ''}${o.stitch ? 'Stitch: ' + o.stitch : ''}
+          </div>
+          <div class="order-price">${o.price} TK ${o.advance ? '(Adv: ' + o.advance + ' TK)' : ''}</div>
+        </div>
+      `).join('');
+    }
+  </script>
 </body>
 </html>
