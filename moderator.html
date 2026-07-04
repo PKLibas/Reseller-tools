@@ -1,128 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moderator Tools</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f2f5; padding: 15px; }
-        .container { max-width: 500px; margin: 0 auto; }
-        h1 { text-align: center; color: #1a1a2e; margin-bottom: 20px; font-size: 22px; }
-        .tabs { display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; }
-        .tab { flex: 1; min-width: 80px; padding: 12px 8px; background: #e0e0e0; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .tab.active { background: #1a1a2e; color: white; }
-        .section { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
-        .section h2 { font-size: 16px; color: #333; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
-        label { display: block; font-size: 14px; color: #555; margin-bottom: 6px; font-weight: 500; }
-        input, select { width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 16px; margin-bottom: 12px; transition: 0.2s; }
-        input:focus, select:focus { outline: none; border-color: #1a1a2e; }
-        .result-box { background: #1a1a2e; color: white; padding: 18px; border-radius: 12px; text-align: center; margin-top: 10px; }
-        .result-box .label { font-size: 13px; opacity: 0.8; margin-bottom: 4px; }
-        .result-box .value { font-size: 28px; font-weight: 700; }
-        .btn { width: 100%; padding: 16px; background: #1a1a2e; color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; }
-        .hidden { display: none; }
-        .image-input { display: flex; gap: 8px; }
-        .image-input input { flex: 1; margin-bottom: 0; }
-        .image-input button { padding: 14px 16px; background: #1a1a2e; color: white; border: none; border-radius: 12px; font-weight: 600; white-space: nowrap; }
-        .image-results { margin-top: 15px; }
-        .image-results a { display: block; padding: 12px; background: #f8f9fa; border-radius: 10px; margin-bottom: 8px; text-decoration: none; color: #1a1a2e; font-size: 14px; font-weight: 500; }
-        .image-results a:hover { background: #e8e8e8; }
-        .divider { height: 1px; background: #e0e0e0; margin: 20px 0; }
-        .copy-btn { background: #28a745 !important; }
-        .copied { background: #17a2b8 !important; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PK LIBAS - Customer Price Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
+.calculator-container{background:rgba(255,255,255,0.95);backdrop-filter:blur(20px);border-radius:24px;box-shadow:0 25px 80px rgba(0,0,0,0.15),0 0 0 1px rgba(255,255,255,0.1);padding:40px 30px;max-width:520px;width:100%;position:relative;overflow:hidden}
+.calculator-container::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,#667eea,#764ba2,#f093fb,#f5576c);background-size:300% 100%;animation:gradientShift 4s ease infinite}
+@keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.title{font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:700;text-align:center;color:#2d3748;letter-spacing:3px;margin-bottom:6px}
+.subtitle{text-align:center;font-size:0.85rem;font-weight:500;color:#764ba2;letter-spacing:4px;text-transform:uppercase;margin-bottom:32px}
+.quantity-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:20px;background:#f7fafc;padding:6px;border-radius:14px}
+.tab-btn{padding:10px 4px;border:none;background:transparent;border-radius:10px;font-family:'Inter',sans-serif;font-weight:600;font-size:0.78rem;color:#718096;cursor:pointer;transition:all 0.3s ease;letter-spacing:0.3px;line-height:1.2}
+.tab-btn:hover{color:#667eea}
+.tab-btn.active{background:linear-gradient(135deg,#667eea,#764ba2);color:white;box-shadow:0 4px 15px rgba(102,126,234,0.4)}
+.input-group{margin-bottom:24px}
+.input-label{display:block;font-size:0.8rem;font-weight:600;color:#4a5568;margin-bottom:8px;letter-spacing:0.5px;text-transform:uppercase}
+.input-field{width:100%;padding:14px 18px;border:2px solid #e2e8f0;border-radius:14px;font-family:'Inter',sans-serif;font-size:1.1rem;font-weight:500;color:#2d3748;transition:all 0.3s ease;background:#fafafa}
+.input-field:focus{outline:none;border-color:#667eea;background:white;box-shadow:0 0 0 4px rgba(102,126,234,0.1)}
+.input-field::placeholder{color:#a0aec0}
+.calculate-btn{width:100%;padding:16px;border:none;border-radius:14px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;font-family:'Inter',sans-serif;font-size:1rem;font-weight:600;letter-spacing:1px;cursor:pointer;transition:all 0.3s ease;box-shadow:0 8px 25px rgba(102,126,234,0.3);margin-bottom:24px}
+.calculate-btn:hover{transform:translateY(-2px);box-shadow:0 12px 35px rgba(102,126,234,0.4)}
+.calculate-btn:active{transform:translateY(0)}
+.result-box{background:linear-gradient(135deg,#f7fafc,#edf2f7);border-radius:16px;padding:24px;text-align:center;border:1px solid #e2e8f0;display:none;animation:fadeIn 0.5s ease}
+.result-box.show{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.result-label{font-size:0.75rem;font-weight:600;color:#718096;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.result-value{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;color:#2d3748;line-height:1.2}
+.result-value.ask-personally{color:#e53e3e;font-size:1.4rem}
+.weight-notice{margin-top:28px;background:linear-gradient(135deg,#fff5f5,#fff);border:1px solid #fed7d7;border-radius:14px;padding:18px 20px;text-align:center;position:relative}
+.weight-notice::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:40px;height:3px;background:#fc8181;border-radius:0 0 4px 4px}
+.weight-icon{font-size:1.4rem;margin-bottom:6px}
+.weight-text{font-size:0.8rem;font-weight:500;color:#742a2a;line-height:1.6}
+.weight-price{font-weight:700;color:#c53030}
+.decorative-circle{position:absolute;border-radius:50%;opacity:0.03;pointer-events:none}
+.circle-1{width:300px;height:300px;background:#667eea;top:-100px;right:-100px}
+.circle-2{width:200px;height:200px;background:#764ba2;bottom:-60px;left:-60px}
+.divider{height:1px;background:#e2e8f0;margin:28px 0}
+.upload-area{border:3px dashed #c8c8c8;border-radius:16px;padding:30px 20px;text-align:center;background:#fafafa;transition:.2s;margin-bottom:16px;cursor:pointer}
+.upload-area:active{border-color:#667eea;background:#f0f4ff}
+.upload-area .icon{font-size:36px;margin-bottom:8px}
+.upload-area p{color:#888;font-size:14px}
+.upload-area p strong{color:#667eea}
+.image-preview{width:100%;border-radius:14px;margin-bottom:16px;display:none;max-height:280px;object-fit:cover}
+.image-results{margin-top:15px}
+.image-results a{display:block;padding:14px;background:#f8f9fa;border-radius:12px;margin-bottom:10px;text-decoration:none;color:#1a1a2e;font-size:14px;font-weight:600;transition:.2s;border-left:4px solid #667eea}
+.image-results a:hover{background:#f0f4ff;transform:translateX(4px)}
+.section-title{font-size:0.8rem;font-weight:600;color:#4a5568;margin-bottom:12px;letter-spacing:0.5px;text-transform:uppercase}
+@media(max-width:400px){.calculator-container{padding:30px 18px}.title{font-size:2rem}.tab-btn{font-size:0.7rem;padding:8px 2px}}
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>👤 Moderator Panel</h1>
-        <div class="tabs">
-            <button class="tab active" onclick="showTab('calc')">💰 Calculator</button>
-            <button class="tab" onclick="showTab('image')">🔍 Image Search</button>
-        </div>
-        <div id="calcSection" class="section">
-            <h2>💰 Price Calculator</h2>
-            <label>Product Price (PKR)</label>
-            <input type="number" id="price" placeholder="Enter price in PKR" oninput="calculate()">
-            <label>Pieces</label>
-            <select id="pieces" onchange="calculate()">
-                <option value="1">1 Piece (Kamiz only)</option>
-                <option value="2">2 Piece Suit</option>
-                <option value="3">3 Piece Suit</option>
-            </select>
-            <label>Fabric Type</label>
-            <select id="fabric" onchange="calculate()">
-                <option value="simple">Simple / Light</option>
-                <option value="heavy">Heavy / Embroidered</option>
-            </select>
-            <div class="result-box">
-                <div class="label">Customer Price (BDT)</div>
-                <div class="value" id="result">0</div>
-            </div>
-            <button class="btn copy-btn" id="copyBtn" onclick="copyResult()">📋 Copy Result</button>
-        </div>
-        <div id="imageSection" class="section hidden">
-            <h2>🔍 Reverse Image Search</h2>
-            <label>Image URL</label>
-            <div class="image-input">
-                <input type="text" id="imgUrl" placeholder="Paste image link here">
-                <button onclick="searchImage()">Search</button>
-            </div>
-            <p style="font-size:12px;color:#888;margin-top:8px;">Paste a dress image URL to find similar items</p>
-            <div class="divider"></div>
-            <div class="image-results" id="imgResults">
-                <p style="text-align:center;color:#888;font-size:14px;">Results will appear here</p>
-            </div>
-        </div>
-    </div>
-    <script>
-        function calculate() {
-            const price = parseFloat(document.getElementById('price').value) || 0;
-            const pieces = parseInt(document.getElementById('pieces').value);
-            const fabric = document.getElementById('fabric').value;
-            let basePrice = (price + 500) / 2.21;
-            let pieceMultiplier = 1;
-            if (pieces === 2) pieceMultiplier = 1.3;
-            if (pieces === 3) pieceMultiplier = 1.6;
-            let fabricMultiplier = fabric === 'heavy' ? 1.2 : 1;
-            let total = basePrice * pieceMultiplier * fabricMultiplier;
-            total = Math.round(total / 50) * 50;
-            document.getElementById('result').textContent = total.toLocaleString() + ' TK';
-        }
-        function copyResult() {
-            const result = document.getElementById('result').textContent;
-            navigator.clipboard.writeText('Price: ' + result).then(() => {
-                const btn = document.getElementById('copyBtn');
-                btn.textContent = '✅ Copied!';
-                btn.classList.add('copied');
-                setTimeout(() => { btn.textContent = '📋 Copy Result'; btn.classList.remove('copied'); }, 2000);
-            });
-        }
-        function searchImage() {
-            const url = document.getElementById('imgUrl').value.trim();
-            if (!url) { alert('Please paste an image URL first'); return; }
-            const results = document.getElementById('imgResults');
-            results.innerHTML = '<p style="text-align:center;color:#888;">Searching...</p>';
-            setTimeout(() => {
-                results.innerHTML = `
-                    <a href="https://lens.google.com/uploadbyurl?url=${encodeURIComponent(url)}" target="_blank">🔍 Search on Google Lens</a>
-                    <a href="https://www.bing.com/images/search?q=imgurl:${encodeURIComponent(url)}" target="_blank">🔍 Search on Bing Images</a>
-                    <a href="https://tineye.com/search?url=${encodeURIComponent(url)}" target="_blank">🔍 Search on TinEye</a>
-                    <a href="https://yandex.com/images/search?url=${encodeURIComponent(url)}&rpt=imageview" target="_blank">🔍 Search on Yandex</a>
-                `;
-            }, 500);
-        }
-        function showTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-            if (tab === 'calc') {
-                document.getElementById('calcSection').classList.remove('hidden');
-                document.getElementById('imageSection').classList.add('hidden');
-            } else {
-                document.getElementById('calcSection').classList.add('hidden');
-                document.getElementById('imageSection').classList.remove('hidden');
-            }
-        }
-    </script>
+<div class="calculator-container">
+<div class="decorative-circle circle-1"></div>
+<div class="decorative-circle circle-2"></div>
+<h1 class="title">PK LIBAS</h1>
+<p class="subtitle">Customer Price Calculator</p>
+<div class="quantity-tabs">
+<button class="tab-btn active" data-type="1s" onclick="selectTab('1s')">1pc<br>Simple</button>
+<button class="tab-btn" data-type="1h" onclick="selectTab('1h')">1pc<br>Heavy Work</button>
+<button class="tab-btn" data-type="2s" onclick="selectTab('2s')">2pc<br>Simple</button>
+<button class="tab-btn" data-type="2h" onclick="selectTab('2h')">2pc<br>Heavy Work</button>
+<button class="tab-btn" data-type="3s" onclick="selectTab('3s')">3pc<br>Simple</button>
+<button class="tab-btn" data-type="3h" onclick="selectTab('3h')">3pc<br>Heavy Work</button>
+</div>
+<div class="input-group">
+<label class="input-label">PKR Amount</label>
+<input type="number" class="input-field" id="pkrAmount" placeholder="Enter amount in PKR" min="0">
+</div>
+<button class="calculate-btn" onclick="calculatePrice()">Calculate Price</button>
+<div class="result-box" id="resultBox">
+<div class="result-label">Final Price</div>
+<div class="result-value" id="resultValue"></div>
+</div>
+<div class="weight-notice">
+<div class="weight-icon">&#128230;</div>
+<div class="weight-text">
+Weight charges will be calculated separately upon delivery in Pakistan at <span class="weight-price">1700 TK/kg</span>.<br>
+Picture will be provided for transparency.
+</div>
+</div>
+<div class="divider"></div>
+<p class="section-title">&#128247; Reverse Image Search</p>
+<div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+<div class="icon">&#128247;</div>
+<p><strong>Tap to upload</strong> a dress photo</p>
+<p style="font-size:12px;margin-top:6px">Search for similar items online</p>
+</div>
+<input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleImage(event)">
+<img id="preview" class="image-preview" alt="Preview">
+<div class="image-results" id="imgResults" style="display:none">
+<p style="color:#888;font-size:14px;margin-bottom:12px">&#128269; Search this image on:</p>
+</div>
+</div>
+<script>
+let selectedType='1s';
+const b=[2000,5000,8000,10000,12000];
+const p={
+'1s':[300,400,400,500,600],
+'1h':[400,500,500,600,700],
+'2s':[350,450,450,550,650],
+'2h':[450,550,550,650,750],
+'3s':[400,500,550,700,900],
+'3h':[500,600,650,800,1000]
+};
+function selectTab(t){selectedType=t;document.querySelectorAll('.tab-btn').forEach(btn=>{btn.classList.remove('active');if(btn.dataset.type===t)btn.classList.add('active')});document.getElementById('resultBox').classList.remove('show')}
+function round50(n){return Math.ceil(n/50)*50}
+function getP(x){const a=p[selectedType];if(x>b[4])return null;for(let i=0;i<b.length;i++){if(x<=b[i])return a[i]}return a[a.length-1]}
+function calculatePrice(){const v=parseFloat(document.getElementById('pkrAmount').value);if(isNaN(v)||v<0){alert('Please enter a valid PKR amount');return}const x=(v+500)/2.21;const pr=getP(x);const rb=document.getElementById('resultBox');const rv=document.getElementById('resultValue');rb.classList.add('show');if(pr===null){rv.innerHTML='Ask Personally';rv.classList.add('ask-personally')}else{const fp=round50(x+pr);rv.innerHTML='&#2547;'+fp.toLocaleString();rv.classList.remove('ask-personally')}}
+document.getElementById('pkrAmount').addEventListener('keypress',function(e){if(e.key==='Enter')calculatePrice()});
+function handleImage(event){
+var file=event.target.files[0];
+if(!file)return;
+var reader=new FileReader();
+reader.onload=function(e){
+var preview=document.getElementById('preview');
+preview.src=e.target.result;
+preview.style.display='block';
+var results=document.getElementById('imgResults');
+results.style.display='block';
+results.innerHTML='<p style="color:#888;font-size:14px;margin-bottom:12px">&#128269; Search this image on:</p>'+
+'<a href="https://lens.google.com/uploadbyurl?url='+encodeURIComponent(e.target.result)+'" target="_blank">&#128269; Google Lens</a>'+
+'<a href="https://www.bing.com/images/search?q=imgurl:'+encodeURIComponent(e.target.result)+'" target="_blank">&#128269; Bing Images</a>'+
+'<a href="https://tineye.com/search?url='+encodeURIComponent(e.target.result)+'" target="_blank">&#128269; TinEye</a>'+
+'<a href="https://yandex.com/images/search?url='+encodeURIComponent(e.target.result)+'&rpt=imageview" target="_blank">&#128269; Yandex</a>';
+};
+reader.readAsDataURL(file);
+}
+</script>
 </body>
 </html>
