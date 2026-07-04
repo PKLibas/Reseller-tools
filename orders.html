@@ -216,7 +216,55 @@
       text-align: center;
       margin-bottom: 20px;
     }
+
+    /* File upload styling */
+    .file-upload {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .file-upload input[type="file"] {
+      display: none;
+    }
+    .file-upload-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: transform 0.2s;
+      white-space: nowrap;
+    }
+    .file-upload-label:active { transform: scale(0.97); }
+    .file-name {
+      font-size: 12px;
+      color: #666;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .image-preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .image-preview img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid #e0e0e0;
+    }
   </style>
+<base target="_blank">
 </head>
 <body>
   <div class="main-card">
@@ -274,29 +322,30 @@
       <input type="text" id="dressUrl" placeholder="https://...">
     </div>
 
+    <div class="input-group">
+      <label>Attach Pictures</label>
+      <div class="file-upload">
+        <label for="dressImages" class="file-upload-label">📎 Choose Files</label>
+        <input type="file" id="dressImages" accept="image/*" multiple onchange="handleFileSelect(this)">
+        <span class="file-name" id="fileName">No files selected</span>
+      </div>
+      <div class="image-preview" id="imagePreview"></div>
+    </div>
+
     <div class="row">
       <div class="input-group">
         <label>Price (TK)</label>
-        <input type="number" id="price" placeholder="0">
+        <input type="number" id="price" placeholder="0" oninput="calculateRemaining()">
       </div>
       <div class="input-group">
         <label>Advance Payment (TK)</label>
-        <input type="number" id="advance" placeholder="0">
+        <input type="number" id="advance" placeholder="0" oninput="calculateRemaining()">
       </div>
     </div>
 
     <div class="input-group">
-      <label>Status</label>
-      <select id="status">
-        <option value="Pending">Pending</option>
-        <option value="Paid">Paid</option>
-        <option value="Delivered">Delivered</option>
-      </select>
-    </div>
-
-    <div class="input-group">
-      <label>Order Number</label>
-      <input type="text" id="orderNumber" placeholder="Auto-generated" readonly>
+      <label>Remaining Amount (TK)</label>
+      <input type="number" id="remaining" placeholder="0" readonly>
     </div>
 
     <div class="input-group">
@@ -326,11 +375,45 @@
   </div>
 
   <script>
-    // Generate order number on load
-    document.getElementById('orderNumber').value = 'PKL-' + Date.now().toString().slice(-6);
+    let attachedImages = [];
 
     // Load saved orders
     loadOrders();
+
+    function calculateRemaining() {
+      const price = parseFloat(document.getElementById('price').value) || 0;
+      const advance = parseFloat(document.getElementById('advance').value) || 0;
+      const remaining = Math.max(0, price - advance);
+      document.getElementById('remaining').value = remaining;
+    }
+
+    function handleFileSelect(input) {
+      const files = input.files;
+      const fileNameSpan = document.getElementById('fileName');
+      const preview = document.getElementById('imagePreview');
+
+      if (files.length === 0) {
+        fileNameSpan.textContent = 'No files selected';
+        preview.innerHTML = '';
+        attachedImages = [];
+        return;
+      }
+
+      fileNameSpan.textContent = files.length + ' file(s) selected';
+      preview.innerHTML = '';
+      attachedImages = [];
+
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          preview.appendChild(img);
+          attachedImages.push(e.target.result);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
 
     function prepareOrder() {
       const reseller = document.getElementById('resellerName').value.trim();
@@ -341,9 +424,9 @@
       const url = document.getElementById('dressUrl').value.trim();
       const price = document.getElementById('price').value;
       const advance = document.getElementById('advance').value;
-      const status = document.getElementById('status').value;
-      const orderNum = document.getElementById('orderNumber').value;
+      const remaining = document.getElementById('remaining').value;
       const notes = document.getElementById('notes').value.trim();
+      const orderNum = 'PKL-' + Date.now().toString().slice(-6);
 
       if (!reseller || !details || !price) {
         alert('Please fill in Reseller Name, Dress Details, and Price.');
@@ -360,8 +443,8 @@ ${customer ? '🧑 Customer: ' + customer + '\n' : ''}👗 Dress: ${details}
 🪡 Stitch: ${stitch || 'N/A'}
 💰 Price: ${price} TK
 💳 Advance: ${advance || '0'} TK
-📊 Status: ${status}
-${url ? '🔗 URL: ' + url + '\n' : ''}${notes ? '📝 Notes: ' + notes + '\n' : ''}
+💵 Remaining: ${remaining || '0'} TK
+${url ? '🔗 URL: ' + url + '\n' : ''}${attachedImages.length > 0 ? '📎 Images: ' + attachedImages.length + ' attached\n' : ''}${notes ? '📝 Notes: ' + notes + '\n' : ''}
 ⏰ Submitted: ${new Date().toLocaleString()}`;
 
       // Create WhatsApp link
@@ -370,7 +453,8 @@ ${url ? '🔗 URL: ' + url + '\n' : ''}${notes ? '📝 Notes: ' + notes + '\n' :
       // Save order locally
       const order = {
         id: orderNum,
-        reseller, customer, details, size, stitch, url, price, advance, status, notes,
+        reseller, customer, details, size, stitch, url, price, advance, remaining, notes,
+        images: attachedImages,
         date: new Date().toISOString()
       };
 
@@ -388,8 +472,21 @@ ${url ? '🔗 URL: ' + url + '\n' : ''}${notes ? '📝 Notes: ' + notes + '\n' :
       // Refresh orders list
       loadOrders();
 
-      // Generate new order number
-      document.getElementById('orderNumber').value = 'PKL-' + Date.now().toString().slice(-6);
+      // Reset form
+      document.getElementById('resellerName').value = '';
+      document.getElementById('customerName').value = '';
+      document.getElementById('dressDetails').value = '';
+      document.getElementById('size').value = '';
+      document.getElementById('stitch').value = '';
+      document.getElementById('dressUrl').value = '';
+      document.getElementById('dressImages').value = '';
+      document.getElementById('fileName').textContent = 'No files selected';
+      document.getElementById('imagePreview').innerHTML = '';
+      document.getElementById('price').value = '';
+      document.getElementById('advance').value = '';
+      document.getElementById('remaining').value = '';
+      document.getElementById('notes').value = '';
+      attachedImages = [];
     }
 
     function loadOrders() {
@@ -409,14 +506,13 @@ ${url ? '🔗 URL: ' + url + '\n' : ''}${notes ? '📝 Notes: ' + notes + '\n' :
         <div class="order-item">
           <div class="order-header">
             <span class="order-id">${o.id}</span>
-            <span class="order-status status-${o.status.toLowerCase()}">${o.status}</span>
           </div>
           <div class="order-details">
             <strong>${o.reseller}</strong>${o.customer ? ' → ' + o.customer : ''}<br>
             ${o.details}<br>
             ${o.size ? 'Size: ' + o.size + ' | ' : ''}${o.stitch ? 'Stitch: ' + o.stitch : ''}
           </div>
-          <div class="order-price">${o.price} TK ${o.advance ? '(Adv: ' + o.advance + ' TK)' : ''}</div>
+          <div class="order-price">${o.price} TK ${o.advance ? '(Adv: ' + o.advance + ' TK, Rem: ' + (o.remaining || '0') + ' TK)' : ''}</div>
         </div>
       `).join('');
     }
