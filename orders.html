@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f2f5; padding: 15px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        h1 { text-align: center; color: #1a1a2e; margin-bottom: 20px; font-size: 22px; }
+        .section { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+        .section h2 { font-size: 16px; color: #333; margin-bottom: 15px; }
+        label { display: block; font-size: 14px; color: #555; margin-bottom: 6px; font-weight: 500; }
+        label .optional { color: #888; font-weight: 400; font-size: 12px; }
+        input, select { width: 100%; padding: 14px; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 16px; margin-bottom: 12px; transition: 0.2s; }
+        input:focus, select:focus { outline: none; border-color: #1a1a2e; }
+        .btn { width: 100%; padding: 16px; background: #1a1a2e; color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+        .btn-danger { background: #dc3545; }
+        .btn-success { background: #28a745; }
+        .btn-small { padding: 8px 14px; font-size: 13px; width: auto; margin-top: 0; }
+        .order-card { background: #f8f9fa; border-radius: 12px; padding: 15px; margin-bottom: 12px; border-left: 4px solid #1a1a2e; }
+        .order-card.placed { border-left-color: #17a2b8; }
+        .order-card.notavail { border-left-color: #dc3545; }
+        .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .order-name { font-weight: 700; font-size: 16px; color: #1a1a2e; }
+        .order-price { font-weight: 700; font-size: 18px; color: #28a745; }
+        .order-details { font-size: 13px; color: #666; line-height: 1.6; }
+        .order-actions { display: flex; gap: 8px; margin-top: 12px; }
+        .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .stat-box { background: #1a1a2e; color: white; padding: 15px; border-radius: 12px; text-align: center; }
+        .stat-box .number { font-size: 24px; font-weight: 700; }
+        .stat-box .label { font-size: 12px; opacity: 0.8; margin-top: 4px; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 15px; }
+        .tab { flex: 1; padding: 12px; background: #e0e0e0; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .tab.active { background: #1a1a2e; color: white; }
+        .hidden { display: none; }
+        .empty-state { text-align: center; padding: 40px; color: #888; }
+        .search-box { margin-bottom: 15px; }
+        .search-box input { margin-bottom: 0; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .badge-pending { background: #fff3cd; color: #856404; }
+        .badge-placed { background: #d1ecf1; color: #0c5460; }
+        .badge-notavail { background: #f8d7da; color: #721c24; }
+        .url-box { background: #f0f2f5; padding: 10px 14px; border-radius: 8px; word-break: break-all; font-size: 12px; color: #1a1a2e; margin-top: 6px; }
+        .url-box a { color: #1a73e8; text-decoration: none; }
+        .order-num-box { background: #e8f4f8; padding: 8px 12px; border-radius: 8px; font-size: 13px; color: #0c5460; margin-top: 6px; font-weight: 600; }
+        .fade-in { animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📦 Order Manager</h1>
+        <div class="stats">
+            <div class="stat-box">
+                <div class="number" id="totalOrders">0</div>
+                <div class="label">Total Orders</div>
+            </div>
+            <div class="stat-box">
+                <div class="number" id="totalAmount">0</div>
+                <div class="label">Total Value (TK)</div>
+            </div>
+        </div>
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('add')">➕ Add Order</button>
+            <button class="tab" onclick="showTab('list')">📋 View Orders</button>
+        </div>
+        <div id="addSection" class="section">
+            <h2>Add New Order</h2>
+            <label>Reseller Name</label>
+            <input type="text" id="resellerName" placeholder="Enter reseller name">
+            <label>Customer Name <span class="optional">(Optional)</span></label>
+            <input type="text" id="customerName" placeholder="Enter customer name">
+            <label>Dress Details</label>
+            <input type="text" id="dressDetails" placeholder="e.g., 3pc Heavy Embroidered Red">
+            <label>Size</label>
+            <select id="dressSize">
+                <option value="Small">Small</option>
+                <option value="Medium">Medium</option>
+                <option value="Large">Large</option>
+                <option value="Unstitched">Unstitched</option>
+            </select>
+            <label>Stitch Type</label>
+            <select id="stitchType">
+                <option value="Stitched">Stitched</option>
+                <option value="Unstitched">Unstitched</option>
+            </select>
+            <label>Dress URL <span class="optional">(Copy & paste link to book)</span></label>
+            <input type="text" id="dressUrl" placeholder="https://example.com/dress-link">
+            <label>Price (TK)</label>
+            <input type="number" id="orderPrice" placeholder="Enter final price">
+            <label>Advance Payment (TK)</label>
+            <input type="number" id="advancePayment" placeholder="Enter advance amount (0 if none)">
+            <label>Status</label>
+            <select id="orderStatus" onchange="toggleOrderNum()">
+                <option value="pending">Pending</option>
+                <option value="placed">Order Placed</option>
+                <option value="notavail">Not Available</option>
+            </select>
+            <div id="orderNumBox" class="hidden">
+                <label>Order Number</label>
+                <input type="text" id="orderNumber" placeholder="Enter order number">
+            </div>
+            <label>Notes <span class="optional">(Optional)</span></label>
+            <input type="text" id="orderNotes" placeholder="Any extra details...">
+            <button class="btn" onclick="addOrder()">✅ Save Order</button>
+        </div>
+        <div id="listSection" class="section hidden">
+            <h2>All Orders</h2>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 Search by name..." oninput="renderOrders()">
+            </div>
+            <div id="ordersList">
+                <div class="empty-state">
+                    <p>No orders yet. Add your first order!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let orders = JSON.parse(localStorage.getItem('dressOrders')) || [];
+        function showTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            if (tab === 'add') {
+                document.getElementById('addSection').classList.remove('hidden');
+                document.getElementById('listSection').classList.add('hidden');
+            } else {
+                document.getElementById('addSection').classList.add('hidden');
+                document.getElementById('listSection').classList.remove('hidden');
+                renderOrders();
+            }
+        }
+        function toggleOrderNum() {
+            const status = document.getElementById('orderStatus').value;
+            const box = document.getElementById('orderNumBox');
+            if (status === 'placed') {
+                box.classList.remove('hidden');
+                box.classList.add('fade-in');
+            } else {
+                box.classList.add('hidden');
+                document.getElementById('orderNumber').value = '';
+            }
+        }
+        function addOrder() {
+            const reseller = document.getElementById('resellerName').value.trim();
+            const customer = document.getElementById('customerName').value.trim();
+            const dress = document.getElementById('dressDetails').value.trim();
+            const size = document.getElementById('dressSize').value;
+            const stitch = document.getElementById('stitchType').value;
+            const url = document.getElementById('dressUrl').value.trim();
+            const price = parseFloat(document.getElementById('orderPrice').value) || 0;
+            const advance = parseFloat(document.getElementById('advancePayment').value) || 0;
+            const status = document.getElementById('orderStatus').value;
+            const orderNumber = document.getElementById('orderNumber').value.trim();
+            const notes = document.getElementById('orderNotes').value.trim();
+            if (!reseller || !dress || !price) {
+                alert('Please fill in Reseller Name, Dress Details, and Price'); return;
+            }
+            if (status === 'placed' && !orderNumber) {
+                alert('Please enter an Order Number for "Order Placed" status'); return;
+            }
+            const order = {
+                id: Date.now(), reseller, customer, dress, size, stitch, url, price, advance, status, orderNumber, notes,
+                date: new Date().toLocaleDateString()
+            };
+            orders.push(order);
+            localStorage.setItem('dressOrders', JSON.stringify(orders));
+            document.getElementById('resellerName').value = '';
+            document.getElementById('customerName').value = '';
+            document.getElementById('dressDetails').value = '';
+            document.getElementById('dressUrl').value = '';
+            document.getElementById('orderPrice').value = '';
+            document.getElementById('advancePayment').value = '';
+            document.getElementById('orderNumber').value = '';
+            document.getElementById('orderNotes').value = '';
+            document.getElementById('orderStatus').value = 'pending';
+            toggleOrderNum();
+            updateStats();
+            alert('✅ Order saved successfully!');
+        }
+        function renderOrders() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const list = document.getElementById('ordersList');
+            let filtered = orders;
+            if (search) {
+                filtered = orders.filter(o => 
+                    o.reseller.toLowerCase().includes(search) || 
+                    (o.customer && o.customer.toLowerCase().includes(search)) ||
+                    o.dress.toLowerCase().includes(search)
+                );
+            }
+            filtered = filtered.sort((a, b) => b.id - a.id);
+            if (filtered.length === 0) {
+                list.innerHTML = '<div class="empty-state"><p>No orders found.</p></div>'; return;
+            }
+            list.innerHTML = filtered.map(order => {
+                const remaining = order.price - order.advance;
+                let statusClass = '';
+                let statusBadge = '';
+                if (order.status === 'pending') {
+                    statusBadge = '<span class="badge badge-pending">Pending</span>';
+                } else if (order.status === 'placed') {
+                    statusClass = 'placed';
+                    statusBadge = '<span class="badge badge-placed">Order Placed</span>';
+                } else if (order.status === 'notavail') {
+                    statusClass = 'notavail';
+                    statusBadge = '<span class="badge badge-notavail">Not Available</span>';
+                }
+                const urlDisplay = order.url ? `<div class="url-box">🔗 <a href="${order.url}" target="_blank">${order.url}</a></div>` : '';
+                const orderNumDisplay = order.orderNumber ? `<div class="order-num-box">📋 Order #: ${order.orderNumber}</div>` : '';
+                return `
+                    <div class="order-card ${statusClass}">
+                        <div class="order-header">
+                            <div>
+                                <div class="order-name">${order.customer || 'No Customer Name'}</div>
+                                <div style="font-size:12px;color:#888;">Reseller: ${order.reseller}</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div class="order-price">${order.price.toLocaleString()} TK</div>
+                                ${statusBadge}
+                            </div>
+                        </div>
+                        <div class="order-details">
+                            👗 ${order.dress}<br>
+                            📏 Size: ${order.size} | 🪡 ${order.stitch}<br>
+                            📅 ${order.date}<br>
+                            💰 Advance: ${order.advance.toLocaleString()} TK | Due: ${remaining.toLocaleString()} TK
+                            ${order.notes ? '<br>📝 ' + order.notes : ''}
+                        </div>
+                        ${orderNumDisplay}
+                        ${urlDisplay}
+                        <div class="order-actions">
+                            <button class="btn btn-small btn-success" onclick="markPaid(${order.id})">💰 Mark Paid</button>
+                            <button class="btn btn-small" style="background:#17a2b8;" onclick="markDelivered(${order.id})">📦 Delivered</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteOrder(${order.id})">🗑️ Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        function markPaid(id) {
+            const order = orders.find(o => o.id === id);
+            if (order) { order.status = 'paid'; order.advance = order.price; localStorage.setItem('dressOrders', JSON.stringify(orders)); renderOrders(); updateStats(); }
+        }
+        function markDelivered(id) {
+            const order = orders.find(o => o.id === id);
+            if (order) { order.status = 'delivered'; localStorage.setItem('dressOrders', JSON.stringify(orders)); renderOrders(); updateStats(); }
+        }
+        function deleteOrder(id) {
+            if (!confirm('Are you sure you want to delete this order?')) return;
+            orders = orders.filter(o => o.id !== id);
+            localStorage.setItem('dressOrders', JSON.stringify(orders));
+            renderOrders(); updateStats();
+        }
+        function updateStats() {
+            document.getElementById('totalOrders').textContent = orders.length;
+            const total = orders.reduce((sum, o) => sum + o.price, 0);
+            document.getElementById('totalAmount').textContent = total.toLocaleString();
+        }
+        updateStats();
+    </script>
+</body>
+</html>
